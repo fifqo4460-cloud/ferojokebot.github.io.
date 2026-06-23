@@ -2,11 +2,9 @@
 <html lang="sk">
 <head>
     <meta charset="UTF-8">
-    <title>Fero JOKE - Inteligentný slovenský chatbot online</title>
-    <meta name="description" content="Pokecaj si s botom Fero JOKE. Najmúdrejší slovenský chatbot, ktorý mení náladu aj pozadie stránky!">
+    <title>Fero JOKE - Klasický slovenský retro chatbot</title>
     
     <style>
-        /* Plynulá zmena farby pozadia */
         body { 
             font-family: Arial, sans-serif; 
             padding: 20px; 
@@ -16,38 +14,34 @@
             transition: background-color 0.5s ease, color 0.3s ease;
         }
 
-        /* 🟢 POZADIE KEĎ JE DOBRÝ (Zeleno-biele / svetlozelené) */
+        /* 🟢 POZADIE KEĎ JE DOBRÝ */
         .mood-good {
-            background-color: #f0fdf4; /* Veľmi svetlá zelená */
+            background-color: #f0fdf4; 
             color: #0f172a;
         }
 
-        /* 🔴 POZADIE KEĎ JE NAHNEVANÝ (Červené) */
+        /* 🔴 POZADIE KEĎ JE NASRANÝ (Tmavá červená) */
         .mood-bad {
-            background-color: #7f1d1d; /* Tmavá červená */
+            background-color: #6b0c0c; 
             color: #ffffff;
         }
 
         .profile-area { display: flex; flex-direction: column; align-items: center; margin-bottom: 15px; }
         
-        /* Štýl pre fotku bota */
         .bot-photo { 
             width: 120px; 
             height: 120px; 
             border-radius: 50%; 
             border: 4px solid #0284c7; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
             background-color: #fff; 
             object-fit: cover; 
-            transition: transform 0.3s ease;
         }
         
-        /* Nadpis mení farbu podľa nálady stránky */
         h2 { margin: 10px 0 0 0; font-size: 26px; transition: color 0.3s ease; }
         .mood-good h2 { color: #15803d; }
-        .mood-bad h2 { color: #fecdd3; }
+        .mood-bad h2 { color: #ff8585; }
 
-        /* Četovacie okno */
         #chat-box { 
             width: 450px; 
             height: 350px; 
@@ -58,12 +52,12 @@
             padding: 15px; 
             margin-bottom: 10px; 
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            color: #000000; /* Text správ vnútri okna bude vždy čitateľný */
+            color: #000000; 
         }
         
         .user-msg { color: #2563eb; text-align: right; margin: 8px 0; font-weight: bold; }
         .bot-msg { color: #16a34a; text-align: left; margin: 8px 0; font-weight: bold; }
-        .bot-angry { color: #dc2626; text-align: left; margin: 8px 0; font-weight: bold; font-style: italic; font-size: 17px; }
+        .bot-angry { color: #ff4545; text-align: left; margin: 8px 0; font-weight: bold; font-style: italic; font-size: 17px; }
         
         .input-area { display: flex; width: 480px; gap: 5px; }
         #user-input { flex-grow: 1; padding: 10px; border: 2px solid #cbd5e1; border-radius: 6px; font-size: 16px; }
@@ -72,11 +66,9 @@
         button:hover { background: #0369a1; }
     </style>
 </head>
-<!-- Stránka začína v dobrej nálade -->
 <body class="mood-good">
 
     <div class="profile-area">
-        <!-- Titulná fotka, ktorá sa bude meniť cez JavaScript -->
         <img id="fero-img" class="bot-photo" src="https://dicebear.com" alt="Fero JOKE fotka">
         <h2>Pokecaj si s Fero JOKE!</h2>
     </div>
@@ -84,7 +76,7 @@
     <div id="chat-box"></div>
     
     <div class="input-area">
-        <input type="text" id="user-input" placeholder="Napíš čokoľvek v slovenčine..." onkeypress="skontrolujEnter(event)">
+        <input type="text" id="user-input" placeholder="Napíš niečo pre Fera..." onkeypress="skontrolujEnter(event)">
         <button onclick="posliSpravu()">Odoslať</button>
     </div>
 
@@ -92,24 +84,75 @@
         const MENO_BOTA = "Fero JOKE";
         let jeNahnevany = false;
 
-        // Odkazy na fotky (Milý robot vs Nahnevaný červený robot)
         const FOTO_DOBRY = "https://dicebear.com&texture=grunge";
         const FOTO_ZLY = "https://dicebear.com";
 
-        let zleSlova = ["rit", "debil", "hlupy", "drzy", "hnusny", "drz hubu", "sklapni", "hovno", "kokot", "skaredy", "ropucha"];
-        let dobreSlova = ["prepac", "odpust", "prepáč", "pardon", "si super", "mily", "kamos", "kamoš"];
+        // 🤬 STARÉ KLASICKÉ SLOVENSKÉ NADÁVKY A URÁŽKY (Čo Fera hneď vytočia)
+        let zleSlova = [
+            "rit", "debil", "hlupy", "drzy", "hnusny", "drz hubu", "sklapni", "hovno", "kokot", "skaredy", 
+            "ropucha", "tucny", "tlsty", "mama", "pica", "jebo", "chuj", "sprosty", "magor", "idiot", 
+            "kreten", "trtko", "drb", "pic", "vyjeb", "najeb", "smrad", "trapny", "pako", "mamlas", 
+            "dilino", "suchar", "špina", "kkt", "pc", "db", "foter"
+        ];
+        
+        let dobreSlova = ["prepac", "odpust", "prepáč", "pardon", "si super", "mily", "kamos", "kamoš", "pan", "šéf"];
 
-        let drzeHlasky = [
-            "Varný hrniec je krajší než tvoja riť!",
-            "Sám si hlúpy, pozri sa do zrkadla, čo ti doma visí!",
-            "Mňa neurazíš ty trubka, radšej porozmýšľaj nad sebou.",
-            "Ak sa ti nepáči, klikni na ten červený krížik v rohu prehliadača!",
-            "Hovno vieš ty, ja som teraz super inteligentný bot!",
-            "Nemám hubu, takže ju nemôžem držať. Ty radšej stíš prsty!",
-            "Varný hrniec je krajší než tvoja tvár, nielen riť!"
+        // 🧠 1. STARÁ RETRO DATABÁZA PRE NORMÁLNU NÁLADU
+        let normalnaDatabaza = {
+            "ahoj": "No nazdar! Čo otravuješ cez počítač? Choď radšej okopávať zemiaky.",
+            "cau": "Čau! Rýchlo hovor, čo chceš, lebo mi zamrzne internet.",
+            "nazdar": "Čauko! Zase sa nudíš doma pri monitori?",
+            "ako sa mas": "Mám sa lepšie ako ty, to je jasná vec. Pozri sa radšej na seba.",
+            "nic": "Nič? Tak načo mi sem ťukáš do klávesnice, ty trubka? Choď radšej von na vzduch.",
+            "nic moc": "No tak neplač, daj si radšej studenú sprchu a preber sa.",
+            "vtip": "Tvoj život je najväčší vtip. Ale dobre: Prečo kostry nechodia na disko? Lebo nemajú s kým hodiť reč. Ha-ha-ha, veľmi vtipné.",
+            "ako sa volas": "Volám sa Fero JOKE. A ty si kto, že si taký zvedavý?",
+            "kto si": "Ja som tvoj nový virtuálny kamoš. Starý Ludvík mi prepustil miesto.",
+            "co robis": "Pozerám sa na tie tvoje otravné otázky a premýšľam, kedy ťa to prejde.",
+            "ludvik": "Ludvík z ludvik.sk bol môj brácho, ja som jeho drsná verzia. Tak bacha na mňa!"
+        };
+
+        // 🤬 2. STARÁ RETRO DATABÁZA PRE ZLÚ NÁLADU (Reakcie priamo na zlé slová)
+        let zlaDatabaza = {
+            "rit": "Varný hrniec je krajší než tvoja riť! Choď sa doňho radšej pozrieť!",
+            "hrniec": "Varný hrniec je krajší než tvoja riť, ty pako chodiaci!",
+            "tucny": "Ja som zo železa, ale ty by si mal okamžite prestať žrať, ty sud vyžratý!",
+            "tlsty": "Pozri sa na svoje brucho! Ja som štíhly a ty si tlstá ropucha!",
+            "mama": "Moja mama je čistý kód! Ale tá tvoja ťa zjavne zabudla naučiť slušnému správaniu, ty nevychovanec!",
+            "hlupy": "Sám si sprostý a tupý ako tágo! Pozri sa do zrkadla a zaplač nad sebou!",
+            "debil": "Mňa neurazíš ty chudák trápny, tvoj mozog nemá ani liter!",
+            "hovno": "Hovno máš akurát tak v hlave namiesto mozgu! Skús aspoň raz popremýšľať!",
+            "drz hubu": "Nemám hubu, takže ju nemôžem držať, ty dilino! Ty radšej stíš tie svoje krivé prsty!",
+            "sklapni": "Sklapnúť môžeš akurát tak zubami, mňa nevypneš, ja ťa budem strašiť aj v snoch!",
+            "kokot": "Tento výraz si hovorievaj doma svojmu fotrovi, na mňa s týmto neskúšaj vyskakovať!",
+            "pica": "Skľudni hormón ty primitív, s tvojou slovnou zásobou ťa nezoberú ani za zametača!",
+            "chuj": "Sám si chuj od narodenia! Choď sa liečiť k doktorovi, kým nie je neskoro.",
+            "jebo": "Jediný jebo si tu ty. Vypni túto stránku a choď handry fajčiť!"
+        };
+
+        // 🎲 NÁHODNÉ RETRO URÁŽKY (Keď bot nepozná presné slovo v normálnom režime)
+        let normalneNeviemOdpovede = [
+            "Čo to bľaboceš? Rozprávaj po slovensky, ty mudrc z Trnavy.",
+            "Fúha, tvoj mozoček očividne nestíha. Napíš niečo, čo má hlavu a pätu.",
+            "Nerozumiem tejto tvojej reči. Skús znova a lepšie, ty trubka.",
+            "Hahaha, ty si ale veľký komik. Choď s týmito rečami za mamičkou.",
+            "Moja hlava toto tvoje bľabotanie odmieta spracovať. Napíš niečo normálne.",
+            "Jasné, hovor si čo chceš, aj tak ma to nezaujíma, ty pako drevený."
         ];
 
-        async function posliSpravu() {
+        // 🎲 EXTRÉMNE RETRO URÁŽKY (Keď bot netuší slovo a stránka je krvavo červená)
+        let drzeNeviemOdpovede = [
+            "Zase melieš hovadiny, choď radšej drhnúť ten varný hrniec, ty pako!",
+            "Tvoje sprosté reči ma absolútne nezaujímajú, píšeš ako totálny idiot a sedliak.",
+            "Melieš ako pokazený mlynček. Radšej odíď od toho počítača.",
+            "Ešte raz mi napíš takúto sprostosť a dostaneš drevený spacák, ty trubka!",
+            "Ty si vážne myslíš, že ma týmito primitívnymi rečami naserieš? Si nula celá nula.",
+            "Nudíš ma, ty mentálny atlét z dediny. Choď radšej von pásť kozy!",
+            "Čo na mňa tak pozeráš cez ten monitor? Vypadni z mojej stránky, ty chudák!",
+            "Ty si fakt dutý ako bambus. Škoda prúdu na teba, ty dilino."
+        ];
+
+        function posliSpravu() {
             let input = document.getElementById("user-input");
             let povodnyText = input.value.trim();
             let textNaHladanie = povodnyText.toLowerCase();
@@ -119,12 +162,14 @@
             pridajSpravu("Ty: " + povodnyText, "user-msg");
             input.value = "";
 
-            // Detekcia nálady podla slov
+            // Detekcia zlých slov
             for (let slovo of zleSlova) {
                 if (textNaHladanie.includes(slovo)) { 
                     jeNahnevany = true; 
                 }
             }
+            
+            // Detekcia udobrenia
             for (let slovo of dobreSlova) {
                 if (textNaHladanie.includes(slovo)) { 
                     jeNahnevany = false; 
@@ -134,58 +179,33 @@
             let teloStranky = document.body;
             let fotoBota = document.getElementById("fero-img");
 
-            // 🔴 REŽIM: Fero je nahnevaný (Červené pozadie + zlá fotka)
-            if (jeNahnevany) {
-                teloStranky.className = "mood-bad";
-                fotoBota.src = FOTO_ZLY;
-                
-                setTimeout(() => {
-                    let nahodnyIndex = Math.floor(Math.random() * drzeHlasky.length);
-                    pridajSpravu(MENO_BOTA + ": " + drzeHlasky[nahodnyIndex], "bot-angry");
-                }, 500);
-                return;
-            }
+            setTimeout(() => {
+                let odpoved = "";
 
-            // 🟢 REŽIM: Fero je milý (Zeleno-biele pozadie + dobrá fotka)
-            teloStranky.className = "mood-good";
-            fotoBota.src = FOTO_DOBRY;
+                // 🔴 REŽIM: NASRANÝ A AGRESÍVNY FERO
+                if (jeNahnevany) {
+                    teloStranky.className = "mood-bad";
+                    fotoBota.src = FOTO_ZLY;
 
-            try {
-                let response = await fetch("https://huggingface.co", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ inputs: povodnyText })
-                });
-                
-                let data = await response.json();
-                let aiOdpoved = "";
+                    let najdenevZlom = false;
+                    for (let kluc in zlaDatabaza) {
+                        if (textNaHladanie.includes(kluc)) {
+                            odpoved = zlaDatabaza[kluc];
+                            najdenevZlom = true;
+                            break;
+                        }
+                    }
 
-                if (data && data.generated_text) {
-                    aiOdpoved = data.generated_text;
+                    if (!najdenevZlom) {
+                        let nahodnyIndex = Math.floor(Math.random() * drzeNeviemOdpovede.length);
+                        odpoved = drzeNeviemOdpovede[nahodnyIndex];
+                    }
+
+                    pridajSpravu(MENO_BOTA + ": " + odpoved, "bot-angry");
+
+                // 🟢 REŽIM: SARKASTICKÝ FERO
                 } else {
-                    aiOdpoved = "Rozumiem ti a premýšľam nad tým. Povedz mi viac!";
-                }
+                    teloStranky.className = "mood-good";
+                    fotoBota.src = FOTO_DOBRY;
 
-                pridajSpravu(MENO_BOTA + ": " + aiOdpoved, "bot-msg");
-
-            } catch (error) {
-                pridajSpravu(MENO_BOTA + ": Zaujímavé! Moja slovenská databáza ťa pozorne počúva. Čo máš nové?", "bot-msg");
-            }
-        }
-
-        function skontrolujEnter(event) {
-            if (event.key === "Enter") { posliSpravu(); }
-        }
-
-        function pridajSpravu(text, trieda) {
-            let chatBox = document.getElementById("chat-box");
-            let msg = document.createElement("div");
-            msg.className = trieda;
-            msg.innerText = text;
-            chatBox.appendChild(msg);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-    </script>
-
-</body>
-</html>
+                    let najdenevNormalnom = false;
