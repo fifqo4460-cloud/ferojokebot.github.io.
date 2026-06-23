@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    
+    <!-- TOTO SI TERAZ PREČÍTA GOOGLE, ABY ŤA NAŠIEL -->
+    <title>Fero JOKE - Legendárny slovenský chatbot a pokec online</title>
+    <meta name="description" content="Pokecaj si s botom Fero JOKE. Legendárny slovenský chatbot, ktorý sa s tebou porozpráva alebo ťa vtipne zotrie. Vyskúšaj pokec zadarmo!">
+    <meta name="keywords" content="Fero JOKE, chatbot, ludvik sk, pokec bot, slovensky chatbot, vtipny bot">
+
+    <style>
+        body { font-family: Arial, sans-serif; background: #e0f2fe; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        h2 { color: #0369a1; }
+        #chat-box { width: 450px; height: 350px; border: 2px solid #0284c7; border-radius: 8px; background: #fff; overflow-y: scroll; padding: 15px; margin-bottom: 10px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .user-msg { color: #2563eb; text-align: right; margin: 8px 0; font-weight: bold; }
+        .bot-msg { color: #059669; text-align: left; margin: 8px 0; font-weight: bold; }
+        .bot-angry { color: #dc2626; text-align: left; margin: 8px 0; font-weight: bold; font-style: italic; }
+        .input-area { display: flex; width: 480px; gap: 5px; }
+        #user-input { flex-grow: 1; padding: 10px; border: 2px solid #cbd5e1; border-radius: 6px; font-size: 16px; }
+        button { padding: 10px 20px; background: #0284c7; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        button:hover { background: #0369a1; }
+    </style>
+</head>
+<body>
+
+    <h2>Pokecaj si s Fero JOKE!</h2>
+    <div id="chat-box"></div>
+    
+    <div class="input-area">
+        <input type="text" id="user-input" placeholder="Napíš niečo pre Fero JOKE..." onkeypress="skontrolujEnter(event)">
+        <button onclick="posliSpravu()">Odoslať</button>
+    </div>
+
+    <script>
+        const MENO_BOTA = "Fero JOKE"; 
+        let jeNahnevany = false;
+
+        let normalnaDatabaza = {
+            "ahoj": "Ahoj! Rád ťa spoznávam. Ako sa dnes máš?",
+            "ako sa mas": "Mám sa super, ďakujem za opýtanie! Ty sa máš ako?",
+            "ako sa volas": "Volám sa Fero JOKE. Som tu na to, aby som s tebou normálne pokecal.",
+            "kto si": "Som tvoj virtuálny spoločník. Môžeme sa porozprávať o čomkoľvek.",
+            "co robis": "Momentálne premýšľam nad tým, aký je dnes pekný deň.",
+            "vtip": "Vieš, prečo chodia kostry nerady na diskotéku? Lebo tam nemajú s kým hodiť reč!"
+        };
+
+        let zlaDatabaza = {
+            "rit": "Varný hrniec je krajší než tvoja riť!",
+            "hrniec": "Varný hrniec je krajší než tvoja riť!",
+            "hlupy": "Sám si hlúpy, pozri sa do zrkadla!",
+            "debil": "Mňa neurazíš, radšej porozmýšľaj nad sebou.",
+            "otravny": "Ak sa ti nepáči, môžeš moju stránku zavrieť!"
+        };
+
+        let zleSlova = ["rit", "debil", "hlupy", "drzy", "hnusny", "drz hubu", "sklapni"];
+        let dobreSlova = ["prepac", "odpust", "prepáč", "prepáč mi", "mily", "starnes", "pardon"];
+
+        let drzeNeviemOdpovede = [
+            "Čo na mňa takto pozeráš? Radšej mlč.",
+            "Zase melieš hlúposti, choď radšej umyť ten varný hrniec.",
+            "Tvoje slová ma nezaujímajú, píšeš blbosti.",
+            "Skús ma radšej niečo normálne naučiť, lebo ma nudíš."
+        ];
+
+        let normalneNeviemOdpovede = [
+            "Prepáč, ale tomuto nerozumiem. Môžeš mi to vysvetliť?",
+            "Zaujímavé, ale neviem, čo to znamená.",
+            "Moja databáza toto slovo zatiaľ nepozná.",
+            "Nerozumiem, ale ak ma to naučíš, nabudúce budem vedieť!"
+        ];
+
+        let poslednaOtazkaCloveka = "";
+
+        function posliSpravu() {
+            let input = document.getElementById("user-input");
+            let povodnyText = input.value.trim();
+            let textNaHladanie = povodnyText.toLowerCase();
+            
+            if (povodnyText === "") return;
+
+            pridajSpravu("Ty: " + povodnyText, "user-msg");
+            input.value = "";
+
+            setTimeout(() => {
+                let odpoved = "";
+                let stylSpravy = "bot-msg";
+
+                for (let slovo of zleSlova) {
+                    if (textNaHladanie.includes(slovo)) {
+                        jeNahnevany = true;
+                    }
+                }
+
+                for (let slovo of dobreSlova) {
+                    if (textNaHladanie.includes(slovo)) {
+                        jeNahnevany = false;
+                    }
+                }
+
+                if (jeNahnevany) {
+                    stylSpravy = "bot-angry";
+                    
+                    if (poslednaOtazkaCloveka !== "" && zlaDatabaza[poslednaOtazkaCloveka] === undefined && normalnaDatabaza[poslednaOtazkaCloveka] === undefined) {
+                        zlaDatabaza[poslednaOtazkaCloveka] = povodnyText;
+                        poslednaOtazkaCloveka = "";
+                    }
+
+                    let najdenevZlom = false;
+                    for (let kluc in zlaDatabaza) {
+                        if (textNaHladanie.includes(kluc)) {
+                            odpoved = zlaDatabaza[kluc];
+                            najdenevZlom = true;
+                            break;
+                        }
+                    }
+
+                    if (!najdenevZlom) {
+                        let nahodnyIndex = Math.floor(Math.random() * drzeNeviemOdpovede.length);
+                        odpoved = drzeNeviemOdpovede[nahodnyIndex];
+                        poslednaOtazkaCloveka = textNaHladanie;
+                    }
+
+                } else {
+                    if (poslednaOtazkaCloveka !== "" && normalnaDatabaza[poslednaOtazkaCloveka] === undefined && zlaDatabaza[poslednaOtazkaCloveka] === undefined) {
+                        normalnaDatabaza[poslednaOtazkaCloveka] = povodnyText;
+                        poslednaOtazkaCloveka = "";
+                    }
+
+                    let najdenevNormalnom = false;
+                    for (let kluc in normalnaDatabaza) {
+                        if (textNaHladanie.includes(kluc)) {
+                            odpoved = normalnaDatabaza[kluc];
+                            najdenevNormalnom = true;
+                            break;
+                        }
+                    }
+
+                    if (!najdenevNormalnom) {
+                        let nahodnyIndex = Math.floor(Math.random() * normalneNeviemOdpovede.length);
+                        odpoved = normalneNeviemOdpovede[nahodnyIndex];
+                        poslednaOtazkaCloveka = textNaHladanie;
+                    }
+                }
+
+                pridajSpravu(MENO_BOTA + ": " + odpoved, stylSpravy);
+            }, 500);
+        }
+
+        function skontrolujEnter(event) {
+            if (event.key === "Enter") {
+                posliSpravu();
+            }
+        }
+
+        function pridajSpravu(text, trieda) {
+            let chatBox = document.getElementById("chat-box");
+            let msg = document.createElement("div");
+            msg.className = trieda;
+            msg.innerText = text;
+            chatBox.appendChild(msg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+
+</body>
+</html>
